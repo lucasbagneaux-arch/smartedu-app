@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SmartEdu AI - iOS</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ios: {
+                            bg: '#000000',
+                            card: '#1c1c1e',
+                            cardLighter: '#2c2c2e',
+                            accent: '#0a84ff',
+                            green: '#30d158',
+                            purple: '#bf5af2',
+                            orange: '#ff9f0a',
+                            red: '#ff453a',
+                            textMuted: '#8e8e93'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', 'Helvetica Neue', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .ios-card {
+            background-color: rgba(28, 28, 30, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .ios-btn:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+        .island-anim {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .perspective { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
+
+    <!-- App Wrapper / Phone Frame -->
+    <div class="w-full max-w-md h-full sm:h-[850px] sm:rounded-[50px] bg-black sm:border-[8px] sm:border-[#2d2d2d] flex flex-col relative overflow-hidden shadow-2xl">
+
+        <!-- iOS Status Bar & Dynamic Island -->
+        <div class="pt-3 px-7 flex justify-between items-center z-50 select-none">
+            <span id="ios-clock" class="text-xs font-semibold tracking-tight">08:21</span>
+            
+            <!-- Dynamic Island -->
+            <div id="dynamic-island" onclick="toggleIsland()" class="island-anim bg-black text-white border border-white/10 px-3 py-1 flex items-center justify-between cursor-pointer shadow-lg z-50 h-[32px] w-[130px] rounded-[20px]">
+                <div class="flex items-center space-x-2 overflow-hidden">
+                    <i id="island-icon" class="fa-solid fa-bell text-[10px] text-ios-accent"></i>
+                    <span id="island-text" class="text-[11px] font-medium truncate">7h45 - SVT</span>
+                </div>
+                <div id="island-wave" class="flex space-x-[2px] items-end h-3">
+                    <span class="w-[2px] h-2 bg-ios-accent animate-pulse"></span>
+                    <span class="w-[2px] h-3 bg-ios-accent animate-pulse delay-75"></span>
+                    <span class="w-[2px] h-1.5 bg-ios-accent animate-pulse delay-150"></span>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 text-xs">
+                <i class="fa-solid fa-signal text-[10px]"></i>
+                <i class="fa-solid fa-wifi text-[10px]"></i>
+                <i class="fa-solid fa-battery-full text-xs text-ios-green"></i>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <div class="flex-1 overflow-y-auto no-scrollbar pb-24 pt-2 px-4 space-y-4">
+
+            <!-- ================= PAGE 1: AUJOURD'HUI ================= -->
+            <section id="page-today" class="space-y-4">
+                
+                <div class="flex justify-between items-end pt-2 px-1">
+                    <div>
+                        <p class="text-xs text-ios-textMuted uppercase tracking-wider font-semibold">Mercredi 28 Octobre</p>
+                        <h1 class="text-2xl font-bold tracking-tight">Bonjour Thomas</h1>
+                    </div>
+                    <div class="w-9 h-9 rounded-full bg-ios-card flex items-center justify-center border border-white/10">
+                        <i class="fa-solid fa-user text-xs text-ios-textMuted"></i>
+                    </div>
+                </div>
+
+                <!-- Next Alarm / Sleep Widget -->
+                <div class="ios-card rounded-2xl p-4 flex items-center justify-between border border-white/5">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-ios-purple/20 flex items-center justify-center text-ios-purple">
+                            <i class="fa-solid fa-bed text-base"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-ios-textMuted font-medium">Sommeil recommandé</p>
+                            <p class="text-lg font-semibold tracking-tight">06:45 <span class="text-xs text-ios-textMuted font-normal">(Coucher à 22:45)</span></p>
+                        </div>
+                    </div>
+                    <button id="btn-alarm" onclick="toggleSleepAlarm()" class="ios-btn text-xs bg-ios-purple/20 text-ios-purple font-semibold px-3 py-1.5 rounded-full border border-ios-purple/30">
+                        Alarme ON
+                    </button>
+                </div>
+
+                <!-- Automated Revision Schedule -->
+                <div class="ios-card rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-brain text-ios-orange text-sm"></i>
+                            <h2 class="text-sm font-semibold tracking-tight">Révisions IA automatiques</h2>
+                        </div>
+                        <span class="text-[10px] bg-ios-orange/20 text-ios-orange font-semibold px-2 py-0.5 rounded-md">Contrôle J-2</span>
+                    </div>
+
+                    <p class="text-xs text-ios-textMuted">Répétition espacée pour le **Contrôle d'Histoire** :</p>
+
+                    <div class="space-y-2">
+                        <div class="bg-black/40 p-2.5 rounded-xl flex items-center justify-between border border-white/5">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-2 h-2 rounded-full bg-ios-green"></div>
+                                <div>
+                                    <p class="text-xs font-medium">Session #1 (20 min)</p>
+                                    <p class="text-[10px] text-ios-textMuted">Aujourd'hui à 17:30 (Creux détecté)</p>
+                                </div>
+                            </div>
+                            <span class="text-xs text-ios-green font-semibold"><i class="fa-regular fa-circle-check"></i> Prêt</span>
+                        </div>
+                        <div class="bg-black/40 p-2.5 rounded-xl flex items-center justify-between border border-white/5">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-2 h-2 rounded-full bg-ios-orange"></div>
+                                <div>
+                                    <p class="text-xs font-medium">Session #2 (25 min)</p>
+                                    <p class="text-[10px] text-ios-textMuted">Demain à 18:15 (Après le Karaté)</p>
+                                </div>
+                            </div>
+                            <span class="text-[11px] text-ios-textMuted">Programmé</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today Schedule Preview -->
+                <div class="ios-card rounded-2xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-sm font-semibold tracking-tight">Emploi du temps - Aujourd'hui</h2>
+                        <button onclick="switchTab('pronote')" class="text-xs text-ios-accent font-medium">Pronote</button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-3 text-xs p-2 rounded-xl bg-white/5">
+                            <div class="w-1 h-8 rounded-full bg-ios-accent"></div>
+                            <div class="flex-1">
+                                <p class="font-semibold">08:00 - 10:00 • Mathématiques</p>
+                                <p class="text-[10px] text-ios-textMuted">Salle B204 • M. Dupont</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3 text-xs p-2 rounded-xl bg-ios-purple/10 border border-ios-purple/20">
+                            <div class="w-1 h-8 rounded-full bg-ios-purple"></div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-ios-purple">17:00 - 18:30 • Entraînement Karaté</p>
+                                <p class="text-[10px] text-ios-textMuted">Ajouté par l'IA • Gymnase Municipal</p>
+                            </div>
+                            <span class="text-[10px] bg-ios-purple/20 text-ios-purple px-2 py-0.5 rounded-md font-medium">Sport</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ================= PAGE 2: EMPLOI DU TEMPS PRONOTE ================= -->
+            <section id="page-pronote" class="space-y-4 hidden">
+                <div class="flex justify-between items-center pt-2 px-1">
+                    <h1 class="text-2xl font-bold tracking-tight">Pronote Sync</h1>
+                    <button onclick="syncPronote()" class="ios-btn text-xs bg-ios-accent/20 text-ios-accent font-semibold px-3 py-1.5 rounded-full border border-ios-accent/30 flex items-center space-x-1.5">
+                        <i id="sync-icon" class="fa-solid fa-rotate"></i>
+                        <span>Synchroniser</span>
+                    </button>
+                </div>
+
+                <div class="ios-card rounded-2xl p-3 flex items-center justify-between text-xs">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-ios-green animate-ping"></div>
+                        <span class="text-ios-textMuted">Statut : <strong class="text-white">Emploi du temps synchronisé</strong></span>
+                    </div>
+                    <span class="text-[10px] bg-ios-green/20 text-ios-green px-2 py-0.5 rounded-full font-semibold">Connecté</span>
+                </div>
+
+                <!-- Timeline Schedule -->
+                <div class="space-y-3">
+                    <div class="ios-card rounded-2xl p-3 flex space-x-3 items-center border-l-4 border-l-ios-accent">
+                        <div class="text-center w-12 border-r border-white/10 pr-2">
+                            <p class="text-xs font-bold">08:00</p>
+                            <p class="text-[10px] text-ios-textMuted">10:00</p>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-bold">Mathématiques</p>
+                            <p class="text-[10px] text-ios-textMuted">Salle B204 • M. Dupont</p>
+                        </div>
+                    </div>
+
+                    <div class="ios-card rounded-2xl p-3 flex space-x-3 items-center border-l-4 border-l-ios-red">
+                        <div class="text-center w-12 border-r border-white/10 pr-2">
+                            <p class="text-xs font-bold text-ios-red">10:15</p>
+                            <p class="text-[10px] text-ios-textMuted">11:15</p>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center space-x-2">
+                                <p class="text-xs font-bold">Physique-Chimie</p>
+                                <span class="text-[9px] bg-ios-red/20 text-ios-red font-semibold px-1.5 py-0.5 rounded">CONTRÔLE</span>
+                            </div>
+                            <p class="text-[10px] text-ios-textMuted">Salle Labo 2 • Mme. Martin</p>
+                        </div>
+                    </div>
+
+                    <div class="ios-card rounded-2xl p-3 flex space-x-3 items-center border-l-4 border-l-ios-purple">
+                        <div class="text-center w-12 border-r border-white/10 pr-2">
+                            <p class="text-xs font-bold">13:30</p>
+                            <p class="text-[10px] text-ios-textMuted">15:30</p>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-bold">Histoire-Géographie</p>
+                            <p class="text-[10px] text-ios-textMuted">Salle A102 • M. Leroy</p>
+                        </div>
+                    </div>
+
+                    <div class="ios-card rounded-2xl p-3 flex space-x-3 items-center border-l-4 border-l-ios-orange bg-ios-orange/5">
+                        <div class="text-center w-12 border-r border-white/10 pr-2">
+                            <p class="text-xs font-bold text-ios-orange">17:00</p>
+                            <p class="text-[10px] text-ios-textMuted">18:30</p>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-xs font-bold text-ios-orange">Sport : Entraînement Karaté</p>
+                            <p class="text-[10px] text-ios-textMuted">Créneau perso ajouté par l'IA</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= PAGE 3: FICHES IA & PHOTOS ================= -->
+            <section id="page-fiches" class="space-y-4 hidden">
+                <div class="pt-2 px-1">
+                    <h1 class="text-2xl font-bold tracking-tight">Fiches & IA Vision</h1>
+                    <p class="text-xs text-ios-textMuted">Scannez vos cours pour générer des fiches de révision</p>
+                </div>
+
+                <div class="ios-card rounded-2xl p-4 space-y-3 text-center border-dashed border-2 border-ios-accent/40 bg-ios-accent/5">
+                    <div class="w-12 h-12 rounded-full bg-ios-accent/20 text-ios-accent mx-auto flex items-center justify-center">
+                        <i class="fa-solid fa-camera text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold">Photographier un cours / manuel</p>
+                        <p class="text-[10px] text-ios-textMuted mt-1">L'IA extrait le résumé et crée des flashcards</p>
+                    </div>
+
+                    <select class="w-full bg-black/60 border border-white/10 text-xs rounded-xl p-2.5 text-white outline-none">
+                        <option>Lier au contrôle : Histoire (Révolution)</option>
+                        <option>Lier au contrôle : Physique (Interro)</option>
+                    </select>
+
+                    <label class="ios-btn inline-block w-full bg-ios-accent text-white text-xs font-semibold py-2.5 rounded-xl cursor-pointer shadow-lg">
+                        <i class="fa-solid fa-upload mr-1.5"></i> Joindre une photo
+                        <input type="file" accept="image/*" class="hidden" onchange="triggerAiPhoto()">
+                    </label>
+                </div>
+
+                <!-- Generated Flashcards Preview -->
+                <div id="ai-card-result" class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-sm font-semibold tracking-tight">Fiche générée par IA</h2>
+                        <span class="text-[10px] bg-ios-green/20 text-ios-green font-semibold px-2 py-0.5 rounded-md">Analyse terminée</span>
+                    </div>
+
+                    <div class="ios-card rounded-2xl p-4 space-y-2">
+                        <p class="text-xs font-bold text-ios-accent"><i class="fa-solid fa-list-check mr-1"></i> Résumé de la fiche :</p>
+                        <ul class="text-xs text-ios-textMuted space-y-1 list-disc pl-4">
+                            <li><strong>1789 :</strong> Prise de la Bastille et Déclaration des Droits de l'Homme.</li>
+                            <li><strong>Monarchie constitutionnelle :</strong> Échec du compromis politique en 1792.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Flip Card -->
+                    <div onclick="flipCard(this)" class="perspective cursor-pointer">
+                        <div class="ios-card rounded-2xl p-6 text-center transform-style-3d transition-transform duration-500 min-h-[110px] flex items-center justify-center relative">
+                            <div class="backface-hidden">
+                                <span class="text-[10px] text-ios-purple font-semibold uppercase tracking-wider block mb-1">Flashcard • Clic pour retourner</span>
+                                <p class="text-xs font-semibold">En quelle année a été prise la Bastille ?</p>
+                            </div>
+                            <div class="backface-hidden rotate-y-180 absolute inset-0 p-4 flex flex-col items-center justify-center bg-ios-cardLighter rounded-2xl">
+                                <span class="text-[10px] text-ios-green font-semibold uppercase block mb-1">Réponse</span>
+                                <p class="text-xs font-medium text-white">14 Juillet 1789</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= PAGE 4: CHAT IA ================= -->
+            <section id="page-assistant" class="space-y-4 hidden">
+                <div class="pt-2 px-1">
+                    <h1 class="text-2xl font-bold tracking-tight">Assistant IA</h1>
+                    <p class="text-xs text-ios-textMuted">Discutez avec l'IA pour ajuster votre planning</p>
+                </div>
+
+                <div id="chat-box" class="ios-card rounded-2xl p-4 h-[340px] overflow-y-auto space-y-3 text-xs no-scrollbar">
+                    <div class="flex items-start space-x-2">
+                        <div class="w-6 h-6 rounded-full bg-ios-accent/20 text-ios-accent flex items-center justify-center text-[10px] flex-shrink-0">IA</div>
+                        <div class="bg-ios-cardLighter p-2.5 rounded-2xl rounded-tl-none max-w-[85%] text-ios-textMuted">
+                            Bonjour Thomas ! Je suis synchronisé avec Pronote. Que souhaitez-vous ajouter (sport, révisions, événements) ?
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Chat -->
+                <div class="flex space-x-2">
+                    <input id="chat-input" type="text" placeholder="Ex: J'ai foot demain de 18h à 20h..." class="flex-1 bg-ios-card border border-white/10 rounded-full px-4 py-2.5 text-xs text-white outline-none focus:border-ios-accent">
+                    <button onclick="sendChatMessage()" class="w-10 h-10 rounded-full bg-ios-accent text-white flex items-center justify-center flex-shrink-0 ios-btn">
+                        <i class="fa-solid fa-arrow-up text-xs"></i>
+                    </button>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- iOS Bottom Tab Bar -->
+        <div class="absolute bottom-0 inset-x-0 h-20 bg-black/80 backdrop-blur-md border-t border-white/10 flex justify-around items-center px-4 z-50">
+            <button onclick="switchTab('today')" id="tab-today" class="flex flex-col items-center space-y-1 text-ios-accent">
+                <i class="fa-solid fa-calendar-day text-lg"></i>
+                <span class="text-[10px] font-medium">Aujourd'hui</span>
+            </button>
+            <button onclick="switchTab('pronote')" id="tab-pronote" class="flex flex-col items-center space-y-1 text-ios-textMuted">
+                <i class="fa-solid fa-graduation-cap text-lg"></i>
+                <span class="text-[10px] font-medium">Pronote</span>
+            </button>
+            <button onclick="switchTab('fiches')" id="tab-fiches" class="flex flex-col items-center space-y-1 text-ios-textMuted">
+                <i class="fa-solid fa-book-open text-lg"></i>
+                <span class="text-[10px] font-medium">Fiches IA</span>
+            </button>
+            <button onclick="switchTab('assistant')" id="tab-assistant" class="flex flex-col items-center space-y-1 text-ios-textMuted">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                <span class="text-[10px] font-medium">Assistant IA</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Tab Switcher
+        function switchTab(tabName) {
+            ['today', 'pronote', 'fiches', 'assistant'].forEach(tab => {
+                document.getElementById(`page-${tab}`).classList.add('hidden');
+                document.getElementById(`tab-${tab}`).className = 'flex flex-col items-center space-y-1 text-ios-textMuted';
+            });
+            document.getElementById(`page-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).className = 'flex flex-col items-center space-y-1 text-ios-accent';
+        }
+
+        // Dynamic Island Toggle
+        let isExpanded = false;
+        function toggleIsland() {
+            const island = document.getElementById('dynamic-island');
+            const text = document.getElementById('island-text');
+            if (!isExpanded) {
+                island.style.width = '260px';
+                island.style.height = '50px';
+                island.style.borderRadius = '25px';
+                text.innerText = 'Révision Histoire dans 15 min';
+                isExpanded = true;
+            } else {
+                island.style.width = '130px';
+                island.style.height = '32px';
+                island.style.borderRadius = '20px';
+                text.innerText = '7h45 - SVT';
+                isExpanded = false;
+            }
+        }
+
+        // Flip Card Logic
+        let isFlipped = false;
+        function flipCard(card) {
+            const inner = card.querySelector('.transform-style-3d');
+            isFlipped = !isFlipped;
+            inner.style.transform = isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
+        }
+
+        // Sleep Alarm Toggle
+        let alarmOn = true;
+        function toggleSleepAlarm() {
+            const btn = document.getElementById('btn-alarm');
+            alarmOn = !alarmOn;
+            btn.innerText = alarmOn ? 'Alarme ON' : 'Alarme OFF';
+            btn.className = alarmOn ? 
+                'ios-btn text-xs bg-ios-purple/20 text-ios-purple font-semibold px-3 py-1.5 rounded-full border border-ios-purple/30' : 
+                'ios-btn text-xs bg-white/10 text-ios-textMuted font-semibold px-3 py-1.5 rounded-full border border-white/10';
+        }
+
+        // Synchronize Pronote Animation
+        function syncPronote() {
+            const icon = document.getElementById('sync-icon');
+            icon.classList.add('fa-spin');
+            setTimeout(() => {
+                icon.classList.remove('fa-spin');
+                alert('Emploi du temps et devoirs Pronote mis à jour !');
+            }, 1000);
+        }
+
+        // Chat AI Logic
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const box = document.getElementById('chat-box');
+            if (!input.value.trim()) return;
+
+            const userMsg = input.value;
+            box.innerHTML += `
+                <div class="flex items-start justify-end space-x-2">
+                    <div class="bg-ios-accent p-2.5 rounded-2xl rounded-tr-none max-w-[85%] text-white">
+                        ${userMsg}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            // AI Reply Simulation
+            setTimeout(() => {
+                box.innerHTML += `
+                    <div class="flex items-start space-x-2">
+                        <div class="w-6 h-6 rounded-full bg-ios-accent/20 text-ios-accent flex items-center justify-center text-[10px] flex-shrink-0">IA</div>
+                        <div class="bg-ios-cardLighter p-2.5 rounded-2xl rounded-tl-none max-w-[85%] text-white">
+                            C'est noté ! J'ai ajouté cet événement dans votre emploi du temps et ajusté vos mini-séances de révision en conséquence.
+                        </div>
+                    </div>
+                `;
+                box.scrollTop = box.scrollHeight;
+            }, 800);
+        }
+
+        function triggerAiPhoto() {
+            alert("Photo importée ! L'IA a analysé votre cours de révision.");
+        }
+    </script>
+</body>
+</html>
